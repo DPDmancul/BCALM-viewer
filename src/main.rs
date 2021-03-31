@@ -4,7 +4,7 @@ mod dot;
 use argparse::{ArgumentParser, Collect, Store};
 use std::fs::File;
 use std::path::PathBuf;
-use std::io::{BufReader, BufRead, stdin, BufWriter, Write, stdout};
+use std::io::{BufReader, stdin, BufWriter, stdout};
 use std::process::Command;
 
 fn main() {
@@ -47,20 +47,18 @@ fn main() {
   // Read BCAL FASTA file and generate graph
   let mut graph;
   {
-    let buf: Box<dyn BufRead> = match input_file.len(){
-      0 => Box::new(BufReader::new(stdin())),
-      _ => Box::new(BufReader::new(File::open(input_file).unwrap()))
+    graph = match input_file.len(){
+      0 => graph::Graph::from(BufReader::new(stdin())),
+      _ => graph::Graph::from(BufReader::new(File::open(input_file).unwrap()))
     };
-    graph = graph::Graph::from(buf);
   }
 
   // Write DOT output file
   {
-    let mut buf: Box<dyn Write> = match output_file.len(){
-      0 => Box::new(BufWriter::new(stdout())),
-      _ => Box::new(BufWriter::new(File::create(&output_file).unwrap()))
+    match output_file.len(){
+      0 => graph.plot(&mut BufWriter::new(stdout())),
+      _ => graph.plot(&mut BufWriter::new(File::create(&output_file).unwrap()))
     };
-    graph.plot(&mut buf);
   }
 
   // Inovke dot

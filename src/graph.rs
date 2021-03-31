@@ -96,7 +96,7 @@ impl Graph{
   }
 
   /// Creates a dot file for the graph and writes it into the given buffer
-  pub fn plot(self: &mut Self, buf: &mut Box<dyn Write>){
+  pub fn plot<T: Write>(self: &mut Self, buf: &mut T){
 
     // Sets the direction of the nucleotides
     let mut fixed_dir = vec![false; self.nodes.len()];
