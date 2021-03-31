@@ -42,4 +42,4 @@ windows-mingw-32:
       - target/i686-pc-windows-gnu/release/bcalm-viewer.exe
   script:
     - rustup target add i686-pc-windows-gnu
-    - cargo build --release --target i686-pc-windows-gnu
+    - cargo build --release --target i686-pc-windows-gnu -- -C link-args=-mwindows
