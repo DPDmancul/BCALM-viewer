@@ -1,3 +1,5 @@
+//! Represents a de Bruijn graph
+
 #[path="./utils.rs"]
 mod utils;
 
@@ -6,6 +8,7 @@ use std::io::{BufRead, Write};
 use regex::Regex;
 
 #[derive(Debug, Snafu)]
+/// Describes and error on graph generation
 enum GraphError {
   #[snafu(display("Unknown '{}' nucleotide", nucleo))]
   WrongNucleotide{nucleo: char},
@@ -13,14 +16,20 @@ enum GraphError {
   WrongNucleotideInto{seq: String}
 }
 
+/// Represents a graph node
 struct Node{
+  /// Sequence of nucleotides
   seq: String,
+  /// Complement of the sequence
   compl: String,
+  /// vector of kmer counts
   count: Vec<u32>,
+  /// Sequence direction
   dir: bool
 }
 
 impl Node{
+  /// Creates a new node containing the given sequence and vector of counts.
   fn new(seq: String, count: Vec<u32>) -> Result<Node, GraphError>{
     if let Some(compl) = seq.chars().map(utils::complement).rev().collect(){
       Ok(Node{
@@ -34,39 +43,51 @@ impl Node{
     }
   }
 
+  /// Set the direction of the sequence according to the direction symbol ('+' or '-')
   fn set_dir(self: &mut Self, dir: char){
     self.dir = dir == '+';
   }
+  /// Get the direction symbol ('+' or '-')
   fn dir_sign(self: &Self) -> char{
     if self.dir {'+'} else {'-'}
   }
+  /// Check the direction symbol ('+' or '-')
   fn is_dir(self: &Self, dir: char) -> bool{
     dir == self.dir_sign()
   }
 }
 
+/// Represents a graph edge
 struct Edge{
+  /// Index of starting node
   from: usize,
+  /// Index of arrival node
   to: usize,
+  /// Starting direction symbol
   start: char,
+  /// Arrival direction symbol
   end: char
 }
 
+/// Represents a de Bruijn graph
 pub struct Graph{
   nodes: Vec<Node>,
   edges: Vec<Edge>
 }
 
 impl Graph{
+  /// Builds an empty graph
   fn new() -> Graph{
     Graph{nodes: Vec::new(), edges: Vec::new()}
   }
 
+  /// Appends a new node to the graph
   fn append(self: &mut Self, seq: String, count: Vec<u32>) -> Result<(), GraphError>{
     self.nodes.push(Node::new(seq, count)?);
     Ok(())
   }
 
+  /// Adds an edge from the last inserted node to another one
   fn to(self: &mut Self, start: char, to: usize, end: char){
     let from = self.nodes.len()-1;
     if from!= to{
@@ -74,17 +95,22 @@ impl Graph{
     }
   }
 
+  /// Creates a dot file for the graph and writes it into the given buffer
   pub fn plot(self: &mut Self, buf: &mut Box<dyn Write>){
+
+    // Sets the direction of the nucleotides
     let mut fixed_dir = vec![false; self.nodes.len()];
     for e in self.edges.iter(){
-      if self.nodes[e.from].is_dir(e.start){
+      if self.nodes[e.from].is_dir(e.start) && !fixed_dir[e.to]{
         fixed_dir[e.from] = true;
         self.nodes[e.to].set_dir(e.end);
         fixed_dir[e.to] = true;
       }
     }
 
+    // Writes to buffer
     buf.write(b"graph genome {\n\trankdir=\"LR\";\n").unwrap();
+    // Writes all nodes
     for (i, node) in self.nodes.iter().enumerate(){
       writeln!(buf,
         "\t{} [label=\"{}\\n({})\\n{:?}\", shape=cds, {} margin=0.2];",
@@ -92,6 +118,7 @@ impl Graph{
       ).unwrap();
     }
     buf.write(b"\n").unwrap();
+    // Writes all edges which match the direction of the sequences
     for e in self.edges.iter(){
       if self.nodes[e.from].is_dir(e.start){
         writeln!(buf,
@@ -106,8 +133,9 @@ impl Graph{
   }
 }
 
-impl std::convert::From<Box<dyn BufRead>> for Graph{
-  fn from(buf: Box<dyn BufRead>) -> Graph{
+impl<T: BufRead> std::convert::From<T> for Graph{
+  /// Build a de Bruijn graph from FASTA file
+  fn from(buf: T) -> Graph{
     let mut graph = Graph::new();
 
     let count_re = Regex::new(r"ab:Z:(\d+(?: \d+)*)").unwrap();
@@ -128,13 +156,15 @@ impl std::convert::From<Box<dyn BufRead>> for Graph{
       }
 
       // Get counts
-      let count = match count_re.captures(&opt){
+      let count = match count_re.captures(&opt) {
           Some(r) => r.get(1).unwrap().as_str(),
           None => ""
         }.split(' ').map(|s| s.parse().unwrap()).collect();
 
       // Append this node
-      graph.append(line, count).unwrap();
+      if let Err(e) = graph.append(line, count) {
+        panic!("{}; on line {}", e, index+1);
+      }
 
       // Get edges
       for group in link_re.captures_iter(&opt) {

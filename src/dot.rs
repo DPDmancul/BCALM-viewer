@@ -1,8 +1,12 @@
+//! Tries to get the path of `dot` from a set of known paths.
+//! Operates in differents way based on os.
+
 use std::path::Path;
 
 const NOT_FOUND: &str= "dot executable not found. Please insert it into system PATH or set the environment variable DOT_PATH";
 
 #[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "dragonfile", target_os = "android"))]
+/// Tries to get the path of `dot` from a set of known paths.
 pub fn find_dot() -> String{
   if let Ok(_) = which::which("dot") {
     return String::from("dot");
