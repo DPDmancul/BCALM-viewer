@@ -1,14 +1,14 @@
 image: "sseemayer/rust-musl-builder-mingw:latest"
 
 stages:
-  #- test
+  - test
   - build
 
-test:
-  stage: test
-  script:
-  - rustc --version && cargo --version
-  - cargo test --all --verbose
+#test:
+#  stage: test
+#  script:
+#  - rustc --version && cargo --version
+#  - cargo test --all --verbose
 
 linux-musl-64:
   stage: build
