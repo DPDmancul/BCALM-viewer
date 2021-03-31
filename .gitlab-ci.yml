@@ -1,0 +1,43 @@
+image: "sseemayer/rust-musl-builder-mingw:latest"
+
+stages:
+  #- test
+  - build
+
+test:
+  stage: test
+  script:
+  - rustc --version && cargo --version
+  - cargo test --all --verbose
+
+linux-musl-64:
+  stage: build
+  artifacts:
+    paths:
+      - target/x86_64-unknown-linux-musl/release/bcalm-viewer
+  script:
+    - cargo build --release --target x86_64-unknown-linux-musl
+
+windows-mingw-64:
+  stage: build
+  artifacts:
+    paths:
+      - target/x86_64-pc-windows-gnu/release/bcalm-viewer.exe
+  script:
+    - cargo build --release --target x86_64-pc-windows-gnu
+
+linux-musl-32:
+  stage: build
+  artifacts:
+    paths:
+      - target/i686-unknown-linux-musl/release/bcalm-viewer
+  script:
+    - cargo build --release --target i686-unknown-linux-musl
+
+windows-mingw-32:
+  stage: build
+  artifacts:
+    paths:
+      - target/i686-pc-windows-gnu/release/bcalm-viewer.exe
+  script:
+    - cargo build --release --target i686-pc-windows-gnu
