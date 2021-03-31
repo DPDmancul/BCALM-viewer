@@ -32,6 +32,7 @@ linux-musl-32:
     paths:
       - target/i686-unknown-linux-musl/release/bcalm-viewer
   script:
+    - rustup install stable-i686-unknown-linux-musl
     - cargo build --release --target i686-unknown-linux-musl
 
 windows-mingw-32:
@@ -40,4 +41,5 @@ windows-mingw-32:
     paths:
       - target/i686-pc-windows-gnu/release/bcalm-viewer.exe
   script:
+    - rustup install stable-i686-pc-windows-gnu
     - cargo build --release --target i686-pc-windows-gnu
