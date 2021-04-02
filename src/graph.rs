@@ -96,15 +96,17 @@ impl Graph{
   }
 
   /// Creates a dot file for the graph and writes it into the given buffer
-  pub fn plot<T: Write>(self: &mut Self, buf: &mut T){
+  pub fn plot<T: Write>(self: &mut Self, buf: &mut T, dir: bool, symbol: bool){
 
     // Sets the direction of the nucleotides
-    let mut fixed_dir = vec![false; self.nodes.len()];
-    for e in self.edges.iter(){
-      if self.nodes[e.from].is_dir(e.start) && !fixed_dir[e.to]{
-        fixed_dir[e.from] = true;
-        self.nodes[e.to].set_dir(e.end);
-        fixed_dir[e.to] = true;
+    if dir{
+      let mut fixed_dir = vec![false; self.nodes.len()];
+      for e in self.edges.iter(){
+        if self.nodes[e.from].is_dir(e.start) && !fixed_dir[e.to]{
+          fixed_dir[e.from] = true;
+          self.nodes[e.to].set_dir(e.end);
+          fixed_dir[e.to] = true;
+        }
       }
     }
 
@@ -113,20 +115,26 @@ impl Graph{
     // Writes all nodes
     for (i, node) in self.nodes.iter().enumerate(){
       writeln!(buf,
-        "\t{} [label=\"{}\\n({})\\n{:?}\", shape=cds, {} margin=0.2];",
-        i, node.seq, node.compl, node.count, if node.dir{""}else{"orientation=180"}
+        "\t{} [label=\"{}\\n({})\\n{:?}\", shape={} {}margin=0.2];",
+        i, node.seq, node.compl, node.count, if dir{"cds"}else{"rectangle"}, if !dir || node.dir{""}else{"orientation=180 "}
       ).unwrap();
     }
     buf.write(b"\n").unwrap();
     // Writes all edges which match the direction of the sequences
     for e in self.edges.iter(){
       if self.nodes[e.from].is_dir(e.start){
-        writeln!(buf,
-          "\t{}:{} -- {}:{};", // [taillabel=\"{}\", headlabel=\"{}\"];",
+        write!(buf,
+          "\t{}:{} -- {}:{}",
           e.from, "e", //if self.nodes[e.from].dir {"e"} else {"w"},
           e.to, "w" ,//if self.nodes[e.to].dir {"w"} else {"e"},
-          //e.start, e.end
         ).unwrap();
+        if symbol{
+          write!(buf,
+            " [taillabel=\"{}\", headlabel=\"{}\"]",
+            e.start, e.end
+          ).unwrap();
+        }
+        writeln!(buf, ";").unwrap();
       }
     }
     buf.write(b"}\n").unwrap();

@@ -1,7 +1,7 @@
 mod graph;
 mod dot;
 
-use argparse::{ArgumentParser, Collect, Store};
+use argparse::{ArgumentParser, Collect, Store, StoreTrue, StoreFalse};
 use std::fs::File;
 use std::path::PathBuf;
 use std::io::{BufReader, stdin, BufWriter, stdout};
@@ -14,6 +14,8 @@ fn main() {
   let mut dot_format = String::new();
   let mut dot_options: Vec<String> = Vec::new();
   let mut dot_path = String::new();
+  let mut dir = false;
+  let mut symbol = true;
 
   // Parsing arguments
   {
@@ -24,6 +26,12 @@ fn main() {
     args.refer(&mut output_file)
         .add_option(&["-o"], Store, "Output DOT file. If no provided the output file will depend on input one.")
         .metavar("FILE");
+    args.refer(&mut dir)
+        .add_option(&["-a", "--arrow-dir"], StoreTrue, "Enable node arrow direction.")
+        .add_option(&["-r", "--no-arrow-dir"], StoreFalse, "Disable node arrow direction. [defualt]");
+    args.refer(&mut symbol)
+        .add_option(&["-s", "--edge-sign"], StoreTrue, "Enable edge start and end signs. [default]")
+        .add_option(&["-e", "--no-edge-sign"], StoreFalse, "Disable edge start and end signs.");
     args.refer(&mut dot_format)
         .add_option(&["-d", "--dot"], Store, "Invoke dot to generate the graph with the specified format type at the end.")
         .metavar("TYPE");
@@ -56,8 +64,8 @@ fn main() {
   // Write DOT output file
   {
     match output_file.len(){
-      0 => graph.plot(&mut BufWriter::new(stdout())),
-      _ => graph.plot(&mut BufWriter::new(File::create(&output_file).unwrap()))
+      0 => graph.plot(&mut BufWriter::new(stdout()), dir, symbol),
+      _ => graph.plot(&mut BufWriter::new(File::create(&output_file).unwrap()), dir, symbol)
     };
   }
 
