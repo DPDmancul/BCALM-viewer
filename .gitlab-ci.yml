@@ -46,7 +46,7 @@ windows-mingw-64:
     EXT: .exe
   before_script:
     - &migw-w64 apt-get update && apt-get install -y gcc-mingw-w64
-    - echo "\n[target.$TARGET]\nlinker = \"/usr/bin/x86_64-w64-mingw32-gcc\"\nar = \"/usr/x86_64-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
+    - mkdir -p .cargo && echo "\n[target.$TARGET]\nlinker = \"/usr/bin/x86_64-w64-mingw32-gcc\"\nar = \"/usr/x86_64-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
   <<: *build
 
 linux-gnu-32:
@@ -60,7 +60,7 @@ windows-mingw-32:
     EXT: .exe
   before_script:
     - *migw-w64
-    - echo "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
+    - mkdir -p .cargo && echo "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
     - export RUSTFLAGS="-C panic=abort -C lto"
   <<: *build
 
@@ -70,7 +70,7 @@ macos-64:
     OSX_VERSION: "10.10"
     OSX_VERSION_MIN: "10.7"
   before_script:
-    - echo "\n[target.$TARGET]\nlinker = \"$TARGET14-clang\"\nar = \"$TARGET14-ar\"\n" >> .cargo/config.toml
+    - mkdir -p .cargo && echo "\n[target.$TARGET]\nlinker = \"$TARGET14-clang\"\nar = \"$TARGET14-ar\"\n" >> .cargo/config.toml
     - apt-get update && apt-get install wget
     - apt-get install clang gcc g++
     - apt-get install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
