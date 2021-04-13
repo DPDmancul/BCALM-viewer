@@ -16,7 +16,7 @@ stages:
     paths:
       - target/$TARGET/release/bcalm-viewer$EXT
   script:
-    - cargo build --target $TARGET --release $ARGS
+    - cargo build --target $TARGET --release -- $ARGS
 
 
 linux-musl-64:
@@ -41,7 +41,7 @@ windows-mingw-32:
   variables:
     TARGET: i686-pc-windows-gnu
     EXT: .exe
-    ARGS: -- -C link-args=-mwindows
+    ARGS: -C link-args=-mwindows
   before_script: [*target]
   <<: *build
 
@@ -51,6 +51,7 @@ macos-64:
     OSX_VERSION: "10.10"
     OSX_VERSION_MIN: "10.7"
   before_script:
+    - apt install wget
     #- apt install clang gcc g++
     #- apt install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
     - *target
