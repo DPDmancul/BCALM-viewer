@@ -57,16 +57,16 @@ linux-gnu-32:
     - apt-get update && apt install -y gcc-multilib
   <<: *build
 
-windows-mingw-32:
-  variables:
-    TARGET: i686-pc-windows-gnu
-    EXT: .exe
-    BEFORE_BUILD: cp -f /usr/x86_64-w64-mingw32/lib/{,dll}crt2.o `rustc --print sysroot`/lib/rustlib/x86_64-pc-windows-gnu/lib
-  before_script:
-    - *migw-w64
-    - mkdir -p .cargo && printf "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \"link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
-    - export RUSTFLAGS="-C panic=abort" #-C lto"
-  <<: *build
+# windows-mingw-32:
+#   variables:
+#     TARGET: i686-pc-windows-gnu
+#     EXT: .exe
+#     BEFORE_BUILD: bash -c "cp -f /usr/x86_64-w64-mingw32/lib/{,dll}crt2.o `rustc --print sysroot`/lib/rustlib/x86_64-pc-windows-gnu/lib"
+#   before_script:
+#     - *migw-w64
+#     - mkdir -p .cargo && printf "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \"link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
+#     - export RUSTFLAGS="-C panic=abort" #-C lto"
+#   <<: *build
 
 macos-64:
   variables:

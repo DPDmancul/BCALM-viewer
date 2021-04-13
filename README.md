@@ -30,7 +30,7 @@ bcalm-viewer -d pdf list.unitigs.fa
   <!-- * [Linux (armv7)](https://gitlab.com/DPDmancul/bcalm-viewer/-/jobs/artifacts/main/raw/target/armv7-unknown-linux-gnueabihf/release/bcalm-viewer?job=linux-arm) -->
   * [macOS (64 bit)](https://gitlab.com/DPDmancul/bcalm-viewer/-/jobs/artifacts/main/raw/target/x86_64-apple-darwin/release/bcalm-viewer?job=macos-64)
   * [Windows (64 bit)](https://gitlab.com/DPDmancul/bcalm-viewer/-/jobs/artifacts/main/raw/target/x86_64-pc-windows-gnu/release/bcalm-viewer.exe?job=windows-mingw-64)
-  * [Windows (32 bit)](https://gitlab.com/DPDmancul/bcalm-viewer/-/jobs/artifacts/main/raw/target/i686-pc-windows-gnu/release/bcalm-viewer.exe?job=windows-mingw-32)
+  <!-- * [Windows (32 bit)](https://gitlab.com/DPDmancul/bcalm-viewer/-/jobs/artifacts/main/raw/target/i686-pc-windows-gnu/release/bcalm-viewer.exe?job=windows-mingw-32) -->
 
 ## Requirements
 To generate the final file (e.g. `.pdf`) graphviz dot is required. Without it the intermediate file (i.e. `.gv`) can still be generated.
