@@ -10,36 +10,59 @@ stages:
 #  - rustc --version && cargo --version
 #  - cargo test --all --verbose
 
-linux-musl-64:
+.build: &build
   stage: build
   artifacts:
     paths:
-      - target/x86_64-unknown-linux-musl/release/bcalm-viewer
+      - target/$TARGET/release/bcalm-viewer$EXT
   script:
-    - cargo build --release --target x86_64-unknown-linux-musl
+    - cargo build --target $TARGET --release $ARGS
+
+
+linux-musl-64:
+  variables:
+    TARGET: x86_64-unknown-linux-musl
+  <<: *build
 
 windows-mingw-64:
-  stage: build
-  artifacts:
-    paths:
-      - target/x86_64-pc-windows-gnu/release/bcalm-viewer.exe
-  script:
-    - cargo build --release --target x86_64-pc-windows-gnu
+  variables:
+    TARGET: x86_64-pc-windows-gnu
+    EXT: .exe
+  <<: *build
 
 linux-musl-32:
-  stage: build
-  artifacts:
-    paths:
-      - target/i686-unknown-linux-musl/release/bcalm-viewer
-  script:
-    - rustup target add i686-unknown-linux-musl
-    - cargo build --release --target i686-unknown-linux-musl
+  variables:
+    TARGET: i686-unknown-linux-musl
+  before_script:
+    - &target rustup target add $TARGET
+  <<: *build
 
-# windows-mingw-32:
-#   stage: build
-#   artifacts:
-#     paths:
-#       - target/i686-pc-windows-gnu/release/bcalm-viewer.exe
-#   script:
-#     - rustup target add i686-pc-windows-gnu
-#     - cargo rustc --target=i686-pc-windows-gnu --release -- -C link-args=-mwindows
+windows-mingw-32:
+  variables:
+    TARGET: i686-pc-windows-gnu
+    EXT: .exe
+    ARGS: -- -C link-args=-mwindows
+  before_script: [*target]
+  <<: *build
+
+macos-64:
+  variables:
+    TARGET: x86_64-apple-darwin
+    OSX_VERSION: "10.10"
+    OSX_VERSION_MIN: "10.7"
+  before_script:
+    #- apt install clang gcc g++
+    #- apt install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+    - *target
+    - git clone https://github.com/tpoechtrager/osxcross
+    - cd osxcross
+    - wget -nc https://s3.dockerproject.org/darwin/v2/MacOSX$OSX_VERSION.sdk.tar.xz
+    - mv MacOSX$OSX_VERSION.sdk.tar.xz tarballs/
+    - UNATTENDED=yes ./build.sh
+    - rustup target add $T
+    - cd ..
+    - export PATH="$(pwd)/osxcross/target/bin:$PATH"
+    - export LIBZ_SYS_STATIC=1
+    - export CC=o64-clang
+    - export CXX=o64-clang++
+  <<: *build
