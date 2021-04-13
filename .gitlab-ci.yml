@@ -62,7 +62,7 @@ windows-mingw-32:
     EXT: .exe
   before_script:
     - *migw-w64
-    - mkdir -p .cargo && printf "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
+    - mkdir -p .cargo && printf "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \"link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
     - export RUSTFLAGS="-C panic=abort -C lto"
   <<: *build
 
