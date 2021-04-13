@@ -1,4 +1,4 @@
-image: "sseemayer/rust-musl-builder-mingw:latest"
+image: rust:stable
 
 stages:
   - test
@@ -16,32 +16,47 @@ stages:
     paths:
       - target/$TARGET/release/bcalm-viewer$EXT
   script:
-    - cargo build --target $TARGET --release -- $ARGS
+    - rustup target add $TARGET
+    - rustup toolchain install stable-$TARGET
+    - cargo build --target $TARGET --release
 
 
-linux-musl-64:
+linux-gnu-64:
   variables:
-    TARGET: x86_64-unknown-linux-musl
+    TARGET: x86_64-unknown-linux-gnu
+  <<: *build
+
+linux-arm:
+  variables:
+    TARGET: armv7-unknown-linux-gnueabihf
+  before_script:
+    - dpkg --add-architecture armhf
+    - apt-get update
+    - apt-get install -y libc6-armhf-cross libc6-dev-armhf-cross gcc-arm-linux-gnueabihf
   <<: *build
 
 windows-mingw-64:
   variables:
     TARGET: x86_64-pc-windows-gnu
     EXT: .exe
+  before_script:
+    - &migw-w64 apt-get update && apt-get install -y gcc-mingw-w64
+    - echo "\n[target.$TARGET]\nlinker = \"/usr/bin/x86_64-w64-mingw32-gcc\"\nar = \"/usr/x86_64-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
   <<: *build
 
-linux-musl-32:
+linux-gnu-32:
   variables:
-    TARGET: i686-unknown-linux-musl
-  before_script:
-    - &target rustup target add $TARGET
+    TARGET: i686-unknown-linux-gnu
   <<: *build
 
 windows-mingw-32:
   variables:
     TARGET: i686-pc-windows-gnu
     EXT: .exe
-  before_script: [*target]
+  before_script:
+    - *migw-w64
+    - echo "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
+    - export RUSTFLAGS="-C panic=abort -C lto"
   <<: *build
 
 macos-64:
@@ -50,11 +65,10 @@ macos-64:
     OSX_VERSION: "10.10"
     OSX_VERSION_MIN: "10.7"
   before_script:
-    - sudo apt update
-    - sudo apt install wget
-    #- sudo apt install clang gcc g++
-    #- sudo apt install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
-    - *target
+    - echo "\n[target.$TARGET]\nlinker = \"$TARGET14-clang\"\nar = \"$TARGET14-ar\"\n" >> .cargo/config.toml
+    - apt-get update && apt-get install wget
+    - apt-get install clang gcc g++
+    - apt-get install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
     - git clone https://github.com/tpoechtrager/osxcross
     - cd osxcross
     - wget -nc https://s3.dockerproject.org/darwin/v2/MacOSX$OSX_VERSION.sdk.tar.xz
