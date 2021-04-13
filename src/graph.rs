@@ -44,15 +44,15 @@ impl Node{
   }
 
   /// Set the direction of the sequence according to the direction symbol ('+' or '-')
-  fn set_dir(self: &mut Self, dir: char){
+  fn set_dir(&mut self, dir: char){
     self.dir = dir == '+';
   }
   /// Get the direction symbol ('+' or '-')
-  fn dir_sign(self: &Self) -> char{
+  fn dir_sign(&self) -> char{
     if self.dir {'+'} else {'-'}
   }
   /// Check the direction symbol ('+' or '-')
-  fn is_dir(self: &Self, dir: char) -> bool{
+  fn is_dir(&self, dir: char) -> bool{
     dir == self.dir_sign()
   }
 }
@@ -82,13 +82,13 @@ impl Graph{
   }
 
   /// Appends a new node to the graph
-  fn append(self: &mut Self, seq: String, count: Vec<u32>) -> Result<(), GraphError>{
+  fn append(&mut self, seq: String, count: Vec<u32>) -> Result<(), GraphError>{
     self.nodes.push(Node::new(seq, count)?);
     Ok(())
   }
 
   /// Adds an edge from the last inserted node to another one
-  fn to(self: &mut Self, start: char, to: usize, end: char){
+  fn to(&mut self, start: char, to: usize, end: char){
     let from = self.nodes.len()-1;
     if from!= to{
       self.edges.push(Edge{from, to, start, end});
@@ -96,7 +96,7 @@ impl Graph{
   }
 
   /// Creates a dot file for the graph and writes it into the given buffer
-  pub fn plot<T: Write>(self: &mut Self, buf: &mut T, dir: bool, symbol: bool){
+  pub fn plot<T: Write>(&mut self, buf: &mut T, dir: bool, symbol: bool){
 
     // Sets the direction of the nucleotides
     if dir{
@@ -111,7 +111,7 @@ impl Graph{
     }
 
     // Writes to buffer
-    buf.write(b"graph genome {\n\trankdir=\"LR\";\n").unwrap();
+    buf.write_all(b"graph genome {\n\trankdir=\"LR\";\n").unwrap();
     // Writes all nodes
     for (i, node) in self.nodes.iter().enumerate(){
       writeln!(buf,
@@ -119,14 +119,14 @@ impl Graph{
         i, node.seq, node.compl, node.count, if dir{"cds"}else{"rectangle"}, if !dir || node.dir{""}else{"orientation=180 "}
       ).unwrap();
     }
-    buf.write(b"\n").unwrap();
+    buf.write_all(b"\n").unwrap();
     // Writes all edges which match the direction of the sequences
     for e in self.edges.iter(){
       if self.nodes[e.from].is_dir(e.start){
         write!(buf,
-          "\t{}:{} -- {}:{}",
-          e.from, "e", //if self.nodes[e.from].dir {"e"} else {"w"},
-          e.to, "w" ,//if self.nodes[e.to].dir {"w"} else {"e"},
+          "\t{}:e -- {}:w",
+          e.from,
+          e.to,
         ).unwrap();
         if symbol{
           write!(buf,
@@ -137,7 +137,7 @@ impl Graph{
         writeln!(buf, ";").unwrap();
       }
     }
-    buf.write(b"}\n").unwrap();
+    buf.write_all(b"}\n").unwrap();
   }
 }
 
@@ -156,7 +156,7 @@ impl<T: BufRead> std::convert::From<T> for Graph{
 
       // If line is even get options
       if index%2 == 0{
-        if opt.len() != 0 || line.chars().next().unwrap() != '>'{
+        if !opt.is_empty() || !line.starts_with('>') {
           panic!("Syntax error at line {}: \"{}\"", index+1, line);
         }
         opt = line;

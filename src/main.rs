@@ -71,7 +71,7 @@ fn main() {
 
   // Inovke dot
   if dot_format != ""{
-    let path_split: Vec<_>= dot_path.split(" ").collect();
+    let path_split: Vec<_>= dot_path.split(' ').collect();
     Command::new(path_split[0])
       .args(&path_split[1..])
       .arg("-O")

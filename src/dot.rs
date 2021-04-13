@@ -8,7 +8,7 @@ const NOT_FOUND: &str= "dot executable not found. Please insert it into system P
 #[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "openbsd", target_os = "netbsd", target_os = "dragonfile", target_os = "android"))]
 /// Tries to get the path of `dot` from a set of known paths.
 pub fn find_dot() -> String{
-  if let Ok(_) = which::which("dot") {
+  if which::which("dot").is_ok() {
     return String::from("dot");
   }
   if Path::new("/usr/bin/env").exists(){
