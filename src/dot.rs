@@ -17,7 +17,7 @@ pub fn find_dot() -> String{
   if Path::new("/usr/bin/dot").exists(){
     return String::from("/usr/bin/dot");
   }
-  panic!(NOT_FOUND);
+  panic!("{}", NOT_FOUND);
 }
 
 #[cfg(target_os = "macos")]
@@ -31,7 +31,7 @@ pub fn find_dot() -> String{
   if Path::new("/usr/local/bin/dot").exists(){
     return String::from("/usr/local/bin/dot");
   }
-  panic!(NOT_FOUND);
+  panic!("{}", NOT_FOUND);
 }
 
 #[cfg(target_os = "windows")]
@@ -43,7 +43,7 @@ pub fn find_dot() -> String{
     return String::from("dot");
   }
   //String::from("C:/Program Files (x86)/Graphviz 2.28/bin/dot.exe")
-  panic!(NOT_FOUND);
+  panic!("{}", NOT_FOUND);
 }
 
 #[cfg(target_os = "ios")]
