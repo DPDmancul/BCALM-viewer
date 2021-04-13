@@ -1,8 +1,13 @@
-image: rust:stable
+image: rust:latest
 
 stages:
   - test
   - build
+
+cache:
+  paths:
+  - target/
+  - $CARGO_HOME
 
 #test:
 #  stage: test
