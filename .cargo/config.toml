@@ -1,6 +1,6 @@
 [target.i686-pc-windows-gnu]
-rustflags = ["-C panic=abort"]
+rustflags = ["-C panic=abort", "-C link-args=-mwindows"]
 
 [target.x86_64-apple-darwin]
 linker = "x86_64-apple-darwin14-clang"
-ar = "x86_64-apple-darwin14-ar" 
+ar = "x86_64-apple-darwin14-ar"

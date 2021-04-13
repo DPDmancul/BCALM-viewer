@@ -41,7 +41,6 @@ windows-mingw-32:
   variables:
     TARGET: i686-pc-windows-gnu
     EXT: .exe
-    ARGS: -C link-args=-mwindows
   before_script: [*target]
   <<: *build
 
@@ -51,16 +50,15 @@ macos-64:
     OSX_VERSION: "10.10"
     OSX_VERSION_MIN: "10.7"
   before_script:
-    - apt install wget
-    #- apt install clang gcc g++
-    #- apt install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+    - sudo apt install wget
+    #- sudo apt install clang gcc g++
+    #- sudo apt install zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
     - *target
     - git clone https://github.com/tpoechtrager/osxcross
     - cd osxcross
     - wget -nc https://s3.dockerproject.org/darwin/v2/MacOSX$OSX_VERSION.sdk.tar.xz
     - mv MacOSX$OSX_VERSION.sdk.tar.xz tarballs/
     - UNATTENDED=yes ./build.sh
-    - rustup target add $T
     - cd ..
     - export PATH="$(pwd)/osxcross/target/bin:$PATH"
     - export LIBZ_SYS_STATIC=1
