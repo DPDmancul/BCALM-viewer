@@ -23,6 +23,7 @@ cache:
   script:
     - rustup target add $TARGET
     - rustup toolchain install stable-$TARGET
+    - $BEFORE_BUILD
     - cargo build --target $TARGET --release
 
 
@@ -60,6 +61,7 @@ windows-mingw-32:
   variables:
     TARGET: i686-pc-windows-gnu
     EXT: .exe
+    BEFORE_BUILD: cp -f /usr/x86_64-w64-mingw32/lib/{,dll}crt2.o `rustc --print sysroot`/lib/rustlib/x86_64-pc-windows-gnu/lib
   before_script:
     - *migw-w64
     - mkdir -p .cargo && printf "\n[target.$TARGET]\nrustflags = [\"-C\", \"panic=abort\", \"-C\", \"link-args=-mwindows\"]\nlinker = \"/usr/bin/i686-w64-mingw32-gcc\"\nar = \"/usr/i686-w64-mingw32/bin/ar\"\n" >> .cargo/config.toml
@@ -72,7 +74,7 @@ macos-64:
     OSX_VERSION: "10.10"
     OSX_VERSION_MIN: "10.7"
   before_script:
-    - mkdir -p .cargo && printf "\n[target.$TARGET]\nlinker = \"$TARGET14-clang\"\nar = \"$TARGET14-ar\"\n" >> .cargo/config.toml
+    - mkdir -p .cargo && printf "\n[target.$TARGET]\nlinker = \"${TARGET}14-clang\"\nar = \"${TARGET}14-ar\"\n" >> .cargo/config.toml
     - apt-get update && apt-get install -y wget
     - apt-get install -y clang gcc g++ cmake
     - apt-get install -y zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
